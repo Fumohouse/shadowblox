@@ -1,0 +1,11 @@
+/.direnv/
+
+/build/
+*.a
+*.o
+*.os
+.sconsign.dblite
+
+# clangd
+.cache/
+compile_commands.json

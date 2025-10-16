@@ -1,0 +1,27 @@
+# -*- mode: python -*-
+
+Import(
+    [
+        "env_base",
+        "luau_lib",
+        "luau_includes",
+        "shadowblox_lib",
+        "shadowblox_includes",
+        "extern_includes",
+    ]
+)
+
+env = env_base.Clone()
+cdb = env.CompilationDatabase()
+Default(cdb)
+
+sources = Glob("src/*.cpp")
+
+env.Append(LIBS=[shadowblox_lib, luau_lib])
+env.Append(CPPPATH="src/")
+env.Append(CPPPATH=luau_includes)
+env.Append(CPPPATH=shadowblox_includes)
+env.Append(CPPPATH=extern_includes)
+
+prog = env.Program("shadowblox_tests", source=sources)
+Default(prog)

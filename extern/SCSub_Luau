@@ -1,0 +1,25 @@
+# -*- mode: python -*-
+
+Import("env_base")
+
+env = env_base.Clone()
+
+luau_dir = "#extern/luau/"
+luau_includes = [
+    "Common",
+    "Ast",
+    "Compiler",
+    "VM",
+    "CodeGen",
+]
+
+sources = []
+for subdir in luau_includes:
+    sources += Glob(f"{luau_dir}{subdir}/src/*.cpp")
+
+includes = [luau_dir + subdir + "/include/" for subdir in luau_includes]
+env.Append(CPPPATH=includes)
+env.Append(CPPPATH=[luau_dir + subdir + "/src/" for subdir in luau_includes])
+
+lib = env.Library("luau", source=sources)
+Return(["lib", "includes"])

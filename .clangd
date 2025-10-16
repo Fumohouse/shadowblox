@@ -1,0 +1,7 @@
+If:
+    PathMatch: .*\.(hpp|cpp)
+Diagnostics:
+    UnusedIncludes: Strict
+Hover:
+    ShowAKA: Yes
+...

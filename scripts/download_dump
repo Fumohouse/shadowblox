@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+DIR=$(dirname -- "$0")
+
+STUDIO_VERSION=$(head -n 1 $DIR/data/studio_version.txt)
+echo "Studio version: $STUDIO_VERSION"
+curl "http://setup.roblox.com/${STUDIO_VERSION}-API-Dump.json" -o $DIR/data/api_dump.json

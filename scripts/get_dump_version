@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+DIR=$(dirname -- "$0")
+
+mkdir -p $DIR/data
+VER=$(curl -s http://setup.roblox.com/versionQTStudio)
+echo -e "$VER\nUpdated $(date -Iminutes)" > $DIR/data/studio_version.txt
+echo "New version: $VER"

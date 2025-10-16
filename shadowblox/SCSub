@@ -1,0 +1,18 @@
+# -*- mode: python -*-
+# When building final binary: `env.Append(LIBS=[shadowblox_lib, luau_lib])`
+
+Import(["env_base", "luau_includes"])
+
+env = env_base.Clone()
+cdb = env.CompilationDatabase()
+Default(cdb)
+
+sources = Glob("src/*.cpp")
+
+includes = ["#shadowblox/include/"]
+
+env.Append(CPPPATH=includes)
+env.Append(CPPPATH=luau_includes)
+lib = env.Library("shadowblox", source=sources)
+
+Return(["lib", "includes"])

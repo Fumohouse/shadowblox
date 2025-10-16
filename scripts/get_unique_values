@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+
+import json
+from pathlib import Path
+
+path = Path(__file__).parent
+dump_path = path / "data/api_dump.json"
+
+with open(dump_path) as f:
+    data = json.load(f)
+
+memory_categories = set()
+class_tags = set()
+
+member_categories = set()
+member_types = set()
+thread_safety = set()
+
+security = set()
+
+type_categories = set()
+types = set()
+
+for c in data["Classes"]:
+    memory_categories.add(c["MemoryCategory"])
+    if "Tags" in c:
+        for tag in c["Tags"]:
+            class_tags.add(tag)
+
+    for member in c["Members"]:
+        if "Category" in member:
+            member_categories.add(member["Category"])
+        member_types.add(member["MemberType"])
+        thread_safety.add(member["ThreadSafety"])
+
+        if isinstance(member["Security"], dict):
+            security.add(member["Security"]["Read"])
+            security.add(member["Security"]["Write"])
+        else:
+            security.add(member["Security"])
+
+        if "ValueType" in member:
+            type_categories.add(member["ValueType"]["Category"])
+            types.add((member["ValueType"]["Name"], member["ValueType"]["Category"]))
+        if "Parameters" in member:
+            for p in member["Parameters"]:
+                type_categories.add(p["Type"]["Category"])
+                types.add((p["Type"]["Name"], p["Type"]["Category"]))
+        if "ReturnType" in member:
+            type_categories.add(member["ReturnType"]["Category"])
+            types.add((member["ReturnType"]["Name"], member["ReturnType"]["Category"]))
+
+
+print("MEMORY CATEGORIES:")
+for s in memory_categories:
+    print(" " + s)
+print()
+
+print("CLASS TAGS:")
+for s in class_tags:
+    print(" " + s)
+print()
+
+print("MEMBER CATEGORIES:")
+for s in member_categories:
+    print(" " + s)
+print()
+
+print("MEMBER TYPES:")
+for s in member_types:
+    print(" " + s)
+print()
+
+print("THREAD SAFETY:")
+for s in thread_safety:
+    print(" " + s)
+print()
+
+print("SECURITY:")
+for s in security:
+    print(" " + s)
+print()
+
+print("TYPE CATEGORIES:")
+for s in type_categories:
+    print(" " + s)
+print()
+
+print("NON-ENUM, NON-CLASS TYPES:")
+for name, category in types:
+    if category in ["Enum", "Class"]:
+        continue
+    print(f" {category}:{name}")
+print()

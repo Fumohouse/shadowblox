@@ -1,0 +1,17 @@
+walk = "git"
+
+[global]
+excludes = [ "extern/include/*" ]
+
+[formatter.nix]
+command = "nixpkgs-fmt"
+includes = [ "*.nix" ]
+
+[formatter.cpp]
+command = "clang-format"
+options = [ "-i" ]
+includes = [ "*.cpp", "*.hpp" ]
+
+[formatter.py]
+command = "black"
+includes = [ "*.py", "*SConstruct", "*SCSub*" ]
