@@ -4,8 +4,6 @@
 Import(["env_base", "luau_includes"])
 
 env = env_base.Clone()
-cdb = env.CompilationDatabase()
-Default(cdb)
 
 sources = Glob("src/*.cpp")
 sources += Glob("src/Runtime/*.cpp")

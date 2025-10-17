@@ -1,6 +1,6 @@
 [configuration]
 
-entry_symbol = "shadowbloxgd_init"
+entry_symbol = "shadowbloxgdInit"
 compatibility_minimum = 4.1
 
 [libraries]

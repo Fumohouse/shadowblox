@@ -31,14 +31,20 @@ class ThreadHandle;
 
 class LuauRuntime {
 public:
-	enum VMType {
+	enum VMType : uint8_t {
 		CoreVM = 0,
 		UserVM,
-		VM_MAX
+
+		VMMax
 	};
 
 	LuauRuntime(void (*initCallback)(lua_State *));
 	~LuauRuntime();
+
+	LuauRuntime(const LuauRuntime &other) = delete;
+	LuauRuntime(LuauRuntime &&other) = delete;
+	LuauRuntime &operator=(const LuauRuntime &other) = delete;
+	LuauRuntime &operator=(LuauRuntime &&other) = delete;
 
 	ThreadHandle getVM(VMType type);
 
@@ -47,7 +53,7 @@ public:
 
 private:
 	void (*initCallback)(lua_State *);
-	lua_State *vms[VM_MAX];
+	lua_State *vms[VMMax];
 	void initVM(lua_State *L);
 };
 
@@ -55,6 +61,12 @@ class ThreadHandle {
 public:
 	ThreadHandle(lua_State *L);
 	~ThreadHandle();
+
+	ThreadHandle(const ThreadHandle &other) = delete;
+	ThreadHandle(ThreadHandle &&other) = delete;
+	ThreadHandle &operator=(const ThreadHandle &other) = delete;
+	ThreadHandle &operator=(ThreadHandle &&other) = delete;
+
 	operator lua_State *() const;
 
 private:

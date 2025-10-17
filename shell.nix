@@ -26,6 +26,7 @@ pkgs.mkShell.override { stdenv = pkgs.clang19Stdenv; } {
     alias bt="dbg && t"
 
     # Format + Lint
-    alias l="treefmt && scripts/licenser"
+    alias f="treefmt && scripts/licenser"
+    alias l="git ls-files | grep -E '\.(cpp|hpp)$' | xargs clang-tidy"
   '';
 }

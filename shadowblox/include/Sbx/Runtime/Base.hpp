@@ -30,7 +30,7 @@
 
 #include "Sbx/Runtime/LuauRuntime.hpp"
 
-enum UdataTag {
+enum UdataTag : uint8_t {
 	Int64Udata = 0,
 
 	Test1Udata = 124,
@@ -40,7 +40,7 @@ enum UdataTag {
 };
 
 // https://github.com/Pseudoreality/Roblox-Identities
-enum SbxIdentity {
+enum SbxIdentity : uint8_t {
 	AnonymousIdentity = 0,
 	LocalGuiIdentity,
 	GameScriptIdentity,
@@ -55,7 +55,7 @@ enum SbxIdentity {
 	OpenCloudSessionIdentity,
 	TestingGameScriptIdentity,
 
-	IDENTITY_MAX
+	IdentityMax
 };
 
 enum SbxCapability {
@@ -77,7 +77,7 @@ enum SbxCapability {
 };
 
 struct SbxThreadData {
-	LuauRuntime::VMType vmType = LuauRuntime::VM_MAX;
+	LuauRuntime::VMType vmType = LuauRuntime::VMMax;
 	SbxIdentity identity = AnonymousIdentity;
 	int32_t additionalCapability = 0;
 	std::shared_ptr<std::mutex> mutex;

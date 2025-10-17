@@ -4,6 +4,9 @@ env_base = Environment(
     tools=["default", "compilation_db"], CC="clang", CXX="clang++", PLATFORM=""
 )
 
+cdb = env_base.CompilationDatabase()
+Default(cdb)
+
 opts = Variables([], ARGUMENTS)
 
 opts.Add(

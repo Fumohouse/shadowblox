@@ -24,6 +24,7 @@
 
 #include "Sbx/Runtime/Base.hpp"
 
+#include <cstdint>
 #include <cstdlib>
 #include <memory>
 #include <mutex>
@@ -31,6 +32,7 @@
 #include "lua.h"
 #include "lualib.h"
 
+#include "Sbx/Runtime/LuauRuntime.hpp"
 #include "Sbx/Runtime/Stack.hpp"
 
 // Based on the default implementation seen in the Lua 5.1 reference
@@ -76,7 +78,7 @@ lua_State *luaSBX_newstate(LuauRuntime::VMType vmType, SbxIdentity defaultIdenti
 
 	// Base libraries
 	luaL_openlibs(L);
-	LuauStackOp<int64_t>::initMetatable(L);
+	LuauStackOp<int64_t>::InitMetatable(L);
 
 	SbxThreadData *udata = luaSBX_initthreaddata(nullptr, L);
 	udata->vmType = vmType;
@@ -129,7 +131,6 @@ int32_t identityToCapabilities(SbxIdentity identity) {
 		case ElevatedStudioPluginIdentity:
 			return PluginSecurity | LocalUserSecurity | RobloxScriptSecurity | AssistantSecurity | InternalTestSecurity;
 		case COMIdentity:
-			return PluginSecurity | LocalUserSecurity | WritePlayerSecurity | RobloxScriptSecurity | RobloxSecurity | NotAccessibleSecurity;
 		case WebServiceIdentity:
 			return PluginSecurity | LocalUserSecurity | WritePlayerSecurity | RobloxScriptSecurity | RobloxSecurity | NotAccessibleSecurity;
 		case ReplicatorIdentity:

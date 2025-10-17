@@ -10,10 +10,10 @@ Import(
     ]
 )
 
-env = SConscript("../extern/godot-cpp/SConstruct")
+env = env_base.Clone()
 env["use_llvm"] = True
-cdb = env.CompilationDatabase()
-Default(cdb)
+env["use_hot_reload"] = False
+Export("env")
 
 env.Append(CPPPATH=["src/", "include/"])
 sources = Glob("src/*.cpp")
@@ -21,6 +21,8 @@ sources = Glob("src/*.cpp")
 env.Append(LIBS=[shadowblox_lib, luau_lib])
 env.Append(CPPPATH=luau_includes)
 env.Append(CPPPATH=shadowblox_includes)
+
+env = SConscript("../extern/godot-cpp/SConstruct")
 
 if env["target"] in ["editor", "template_debug"]:
     doc_data = env.GodotCPPDocData(

@@ -36,7 +36,7 @@ TEST_CASE("initialize") {
 		hit++;
 	});
 
-	CHECK_EQ(hit, LuauRuntime::VM_MAX);
+	CHECK_EQ(hit, LuauRuntime::VMMax);
 
 	auto LC = rt.getVM(LuauRuntime::CoreVM);
 	SbxThreadData *udataCore = luaSBX_getthreaddata(LC);

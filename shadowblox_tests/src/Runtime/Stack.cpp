@@ -24,8 +24,11 @@
 
 #include "doctest.h"
 
+#include <cstdint>
+#include <string>
+
 #include "lua.h"
-#include "lualib.h"
+#include "lualib.h" // NOLINT
 
 #include "Sbx/Runtime/Base.hpp"
 #include "Sbx/Runtime/LuauRuntime.hpp"
@@ -48,16 +51,16 @@ template <typename T, typename U>
 static inline void testStackOp(lua_State *L, U value) {
 	int top = lua_gettop(L);
 
-	LuauStackOp<T>::push(L, value);
+	LuauStackOp<T>::Push(L, value);
 	CHECK_EQ(lua_gettop(L), top + 1);
 
-	CHECK(LuauStackOp<T>::is(L, -1));
+	CHECK(LuauStackOp<T>::Is(L, -1));
 	CHECK_EQ(lua_gettop(L), top + 1);
 
-	CHECK_EQ(LuauStackOp<T>::get(L, -1), value);
+	CHECK_EQ(LuauStackOp<T>::Get(L, -1), value);
 	CHECK_EQ(lua_gettop(L), top + 1);
 
-	CHECK_EQ(LuauStackOp<T>::check(L, -1), value);
+	CHECK_EQ(LuauStackOp<T>::Check(L, -1), value);
 	CHECK_EQ(lua_gettop(L), top + 1);
 
 	lua_pop(L, 1);
@@ -80,7 +83,7 @@ TEST_CASE("int64") {
 		int64_t i = 9007199254740992;
 		testStackOp<int64_t>(L, i);
 
-		LuauStackOp<int64_t>::push(L, i);
+		LuauStackOp<int64_t>::Push(L, i);
 		REQUIRE(lua_isnumber(L, -1));
 		lua_pop(L, 1);
 	}
@@ -89,7 +92,7 @@ TEST_CASE("int64") {
 		int64_t j = 9007199254740993;
 		testStackOp<int64_t>(L, j);
 
-		LuauStackOp<int64_t>::push(L, j);
+		LuauStackOp<int64_t>::Push(L, j);
 		REQUIRE(lua_isuserdata(L, -1));
 		lua_pop(L, 1);
 	}

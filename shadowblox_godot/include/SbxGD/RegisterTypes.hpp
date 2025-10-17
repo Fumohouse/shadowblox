@@ -28,5 +28,5 @@
 
 using namespace godot;
 
-void initialize_shadowbloxgd_module(ModuleInitializationLevel p_level);
-void uninitialize_shadowbloxgd_module(ModuleInitializationLevel p_level);
+void initializeShadowbloxModule(ModuleInitializationLevel level);
+void uninitializeShadowbloxModule(ModuleInitializationLevel level);
