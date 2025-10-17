@@ -5,6 +5,8 @@ pkgs.mkShell.override { stdenv = pkgs.clang19Stdenv; } {
     scons
     clang-tools
 
+    valgrind
+
     # Formatter
     treefmt
     nixpkgs-fmt
@@ -13,8 +15,17 @@ pkgs.mkShell.override { stdenv = pkgs.clang19Stdenv; } {
   ];
 
   shellHook = ''
-    alias sbx-build-dbg="SCONS_CACHE=build/dbg scons config=debug target=editor debug_symbols=yes"
-    alias sbx-build-relwithdbg="SCONS_CACHE=build/relwithdbg scons config=relwithdbg target=template_release debug_symbols=yes"
-    alias sbx-build-release="SCONS_CACHE=build/release scons config=release target=template_release"
+    # Build
+    alias dbg="SCONS_CACHE=build/dbg scons config=debug target=editor debug_symbols=yes"
+    alias relwithdbg="SCONS_CACHE=build/relwithdbg scons config=relwithdbg target=template_release debug_symbols=yes"
+    alias release="SCONS_CACHE=build/release scons config=release target=template_release"
+
+    # Test
+    alias t="valgrind --leak-check=full shadowblox_tests/shadowblox_tests"
+    # Build + Test
+    alias bt="dbg && t"
+
+    # Format + Lint
+    alias l="treefmt && scripts/licenser"
   '';
 }

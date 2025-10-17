@@ -1,4 +1,11 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later
+#!/usr/bin/env python
+
+import re
+import os
+import subprocess
+
+header_regex = r"// SPDX-License-Identifier: .*\n/\*[\s\S]*?\*/\n*"
+header = """// SPDX-License-Identifier: LGPL-3.0-or-later
 /*******************************************************************************
  * shadowblox - https://git.seki.pw/Fumohouse/shadowblox
  *
@@ -22,37 +29,26 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include "doctest.h"
+"""
 
-#include "Sbx/Runtime/Base.hpp"
-#include "Sbx/Runtime/LuauRuntime.hpp"
-#include "lua.h"
+root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"]).decode("utf-8").strip()
+os.chdir(root)
 
-TEST_SUITE_BEGIN("Runtime/LuauRuntime");
+files = [f for f in subprocess.check_output(["git", "ls-files"]).decode("utf-8").split("\n") if f.endswith(".cpp") or f.endswith(".hpp")]
 
-TEST_CASE("initialize") {
-	static int hit = 0;
-	LuauRuntime rt([](lua_State *L) {
-		hit++;
-	});
+for path in files:
+    with open(path, "r+") as f:
+        contents = f.read()
+        res = re.match(header_regex, contents)
+        if res and res.group(0).strip() == header.strip():
+            print("SKIP", path)
+            continue
 
-	CHECK_EQ(hit, LuauRuntime::VM_MAX);
+        if res:
+            contents = contents[res.end(0):]
 
-	auto LC = rt.getVM(LuauRuntime::CoreVM);
-	SbxThreadData *udataCore = luaSBX_getthreaddata(LC);
-	REQUIRE_NE(udataCore, nullptr);
-	CHECK_EQ(udataCore->vmType, LuauRuntime::CoreVM);
-	CHECK_EQ(udataCore->identity, ElevatedGameScriptIdentity);
+        f.seek(0)
+        f.write(header + contents)
+        f.truncate()
 
-	auto LU = rt.getVM(LuauRuntime::UserVM);
-	SbxThreadData *udataUser = luaSBX_getthreaddata(LU);
-	REQUIRE_NE(udataUser, nullptr);
-	CHECK_EQ(udataUser->vmType, LuauRuntime::UserVM);
-	CHECK_EQ(udataUser->identity, GameScriptIdentity);
-
-	// Ensure acquisition of mutex
-	CHECK_FALSE(udataCore->mutex->try_lock());
-	CHECK_FALSE(udataUser->mutex->try_lock());
-}
-
-TEST_SUITE_END();
+    print(path)

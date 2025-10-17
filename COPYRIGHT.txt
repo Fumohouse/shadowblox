@@ -23,7 +23,7 @@ Files: *
 Comment: shadowblox (source code)
 Copyright: 2025-present, ksk
  2025-present, shadowblox contributors
-License: LGPL-3.0
+License: LGPL-3.0-or-later
 
 Files: .clang-format
 Comment: Files and logic (excerpts) from Godot Engine
@@ -56,7 +56,7 @@ License: Expat
 # LGPL 3.0 License Text #
 #########################
 
-License: LGPL-3.0
+License: LGPL-3.0-or-later
                     GNU LESSER GENERAL PUBLIC LICENSE
                         Version 3, 29 June 2007
  .

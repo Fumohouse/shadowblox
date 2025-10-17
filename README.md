@@ -1,8 +1,8 @@
 # shadowblox
 
 Shadow `DataModel` and script runner emulating Roblox APIs and behaviors. Hooks
-into a frontend that provides rendering, physics, and networking, such
-[Godot](https://godotengine.org/) or another game engine. Like
+into a frontend that provides rendering, input, physics, networking, etc., such
+as [Godot](https://godotengine.org/) or another game engine. Like
 [React](https://react.dev/), but for games.
 
 This project is not affiliated with Roblox Corporation.
@@ -13,11 +13,12 @@ See `COPYRIGHT.txt`.
 
 ## Attributions
 
-The Roblox Luau API is maintained by Roblox Corporation.
-
-shadowblox is built on reverse engineering work for the `.rbxm` file format
-documented by the Rojo team: <https://dom.rojo.space/binary.html>. See the
-credits the Rojo documentation for original sources.
+- The Roblox Luau API is maintained by Roblox Corporation.
+- Rojo team: [Documentation of the `.rbxm` file
+  format](https://dom.rojo.space/binary.html). See the credits in the Rojo
+  documentation for original sources.
+- Pseudoreality: [Documentation of identities and
+  capabilities](https://github.com/Pseudoreality/Roblox-Identities).
 
 ## See also
 
