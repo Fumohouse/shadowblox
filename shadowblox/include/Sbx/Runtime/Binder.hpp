@@ -47,6 +47,16 @@ namespace SBX {
 //
 class LuauClassError : public std::exception {};
 
+template <typename T>
+T luaSBX_checkarg(lua_State *L, int &index) {
+	return LuauStackOp<T>::Check(L, index++);
+}
+
+template <>
+lua_State *luaSBX_checkarg<lua_State *>(lua_State *L, int &index) {
+	return L;
+}
+
 // https://stackoverflow.com/a/70954691
 template <typename Sig>
 struct FuncType;
@@ -62,7 +72,7 @@ struct FuncType<R (*)(Args...)> {
 		// (): Parameter pack expansion may not be evaluated in order
 		// {}: Evaluated in order
 		// https://stackoverflow.com/a/42047998
-		return std::tuple{ LuauStackOp<Args>::Check(L, start++)... };
+		return std::tuple{ luaSBX_checkarg<Args>(L, start)... };
 	}
 };
 
@@ -77,7 +87,7 @@ struct FuncType<R (T::*)(Args...)> {
 	}
 
 	static inline std::tuple<Args...> CheckArgs(lua_State *L, int start = 2) {
-		return std::tuple{ LuauStackOp<Args>::Check(L, start++)... };
+		return std::tuple{ luaSBX_checkarg<Args>(L, start)... };
 	}
 };
 
@@ -92,7 +102,7 @@ struct FuncType<R (T::*)(Args...) const> {
 	}
 
 	static inline std::tuple<Args...> CheckArgs(lua_State *L, int start = 2) {
-		return std::tuple{ LuauStackOp<Args>::Check(L, start++)... };
+		return std::tuple{ luaSBX_checkarg<Args>(L, start)... };
 	}
 };
 
