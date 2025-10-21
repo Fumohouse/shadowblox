@@ -25,6 +25,7 @@
 #include "doctest.h"
 
 #include <cstdint>
+#include <optional>
 #include <string>
 
 #include "lua.h"
@@ -63,6 +64,25 @@ static inline void testStackOp(lua_State *L, U value) {
 	CHECK_EQ(lua_gettop(L), top + 1);
 
 	CHECK_EQ(LuauStackOp<T>::Check(L, -1), value);
+	CHECK_EQ(lua_gettop(L), top + 1);
+
+	CHECK(LuauStackOp<std::optional<T>>::Is(L, -1));
+	CHECK_EQ(lua_gettop(L), top + 1);
+
+	CHECK_EQ(*LuauStackOp<std::optional<T>>::Get(L, -1), value);
+	CHECK_EQ(lua_gettop(L), top + 1);
+
+	lua_pop(L, 1);
+
+	lua_pushnil(L);
+
+	CHECK_FALSE(LuauStackOp<T>::Is(L, -1));
+	CHECK_EQ(lua_gettop(L), top + 1);
+
+	CHECK(LuauStackOp<std::optional<T>>::Is(L, -1));
+	CHECK_EQ(lua_gettop(L), top + 1);
+
+	CHECK_FALSE(LuauStackOp<std::optional<T>>::Get(L, -1).has_value());
 	CHECK_EQ(lua_gettop(L), top + 1);
 
 	lua_pop(L, 1);
@@ -112,15 +132,38 @@ TEST_CASE("udata") {
 	TestStruct x{ 42 };
 	testStackOp<TestStruct>(L, x);
 
-	LuauStackOp<TestStruct *>::Push(L, &x);
+	SUBCASE("pointer") {
+		LuauStackOp<TestStruct *>::Push(L, &x);
 
-	CHECK(LuauStackOp<TestStruct *>::Is(L, -1));
+		CHECK(LuauStackOp<TestStruct *>::Is(L, -1));
 
-	TestStruct *ptr = LuauStackOp<TestStruct *>::Get(L, -1);
-	TestStruct *checkPtr = LuauStackOp<TestStruct *>::Check(L, -1);
-	REQUIRE_NE(ptr, nullptr);
-	CHECK_EQ(ptr, checkPtr);
-	CHECK_EQ(ptr->value, 42);
+		TestStruct *ptr = LuauStackOp<TestStruct *>::Get(L, -1);
+		TestStruct *checkPtr = LuauStackOp<TestStruct *>::Check(L, -1);
+		REQUIRE_NE(ptr, nullptr);
+		CHECK_EQ(ptr, checkPtr);
+		CHECK_EQ(ptr->value, 42);
+	}
+
+	SUBCASE("const pointer") {
+		LuauStackOp<const TestStruct *>::Push(L, &x);
+
+		CHECK(LuauStackOp<const TestStruct *>::Is(L, -1));
+
+		const TestStruct *ptr = LuauStackOp<const TestStruct *>::Get(L, -1);
+		const TestStruct *checkPtr = LuauStackOp<const TestStruct *>::Check(L, -1);
+		REQUIRE_NE(ptr, nullptr);
+		CHECK_EQ(ptr, checkPtr);
+		CHECK_EQ(ptr->value, 42);
+	}
+
+	SUBCASE("reference") {
+		LuauStackOp<TestStruct &>::Push(L, x);
+
+		CHECK_EQ(LuauStackOp<const TestStruct &>::Check(L, -1).value, 42);
+		CHECK_EQ(LuauStackOp<const TestStruct &>::Get(L, -1).value, 42);
+		CHECK_EQ(LuauStackOp<TestStruct &>::Check(L, -1).value, 42);
+		CHECK_EQ(LuauStackOp<TestStruct &>::Get(L, -1).value, 42);
+	}
 
 	lua_pop(L, 1);
 

@@ -25,6 +25,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 
 #include "lua.h"
@@ -33,6 +34,90 @@ namespace SBX {
 
 template <typename T>
 struct LuauStackOp {};
+
+template <typename T>
+struct LuauStackOp<const T *> {
+	static void Push(lua_State *L, const T *value) {
+		LuauStackOp<T *>::Push(L, value);
+	}
+
+	static const T *Get(lua_State *L, int index) {
+		return LuauStackOp<T *>::Get(L, index);
+	}
+
+	static bool Is(lua_State *L, int index) {
+		return LuauStackOp<T>::Is(L, index);
+	}
+
+	static const T *Check(lua_State *L, int index) {
+		return LuauStackOp<T *>::Check(L, index);
+	}
+};
+
+template <typename T>
+struct LuauStackOp<T &> {
+	static void Push(lua_State *L, const T &value) {
+		LuauStackOp<T>::Push(L, value);
+	}
+
+	static T &Get(lua_State *L, int index) {
+		return *LuauStackOp<T *>::Get(L, index);
+	}
+
+	static bool Is(lua_State *L, int index) {
+		LuauStackOp<T>::Is(L, index);
+	}
+
+	static T &Check(lua_State *L, int index) {
+		return *LuauStackOp<T *>::Check(L, index);
+	}
+};
+
+template <typename T>
+struct LuauStackOp<const T &> {
+	static void Push(lua_State *L, const T &value) {
+		LuauStackOp<T>::Push(L, value);
+	}
+
+	static const T &Get(lua_State *L, int index) {
+		return *LuauStackOp<T *>::Get(L, index);
+	}
+
+	static bool Is(lua_State *L, int index) {
+		LuauStackOp<T>::Is(L, index);
+	}
+
+	static const T &Check(lua_State *L, int index) {
+		return *LuauStackOp<T *>::Check(L, index);
+	}
+};
+
+template <typename T>
+struct LuauStackOp<std::optional<T>> {
+	static void Push(lua_State *L, const std::optional<T> &value) {
+		if (value) {
+			LuauStackOp<T>::Push(L, *value);
+		} else {
+			lua_pushnil(L);
+		}
+	}
+
+	static std::optional<T> Get(lua_State *L, int index) {
+		if (LuauStackOp<T>::Is(L, index)) {
+			return LuauStackOp<T>::Get(L, index);
+		} else {
+			return std::nullopt;
+		}
+	}
+
+	static bool Is(lua_State *L, int index) {
+		return true;
+	}
+
+	static std::optional<T> Check(lua_State *L, int index) {
+		return Get(L, index);
+	}
+};
 
 #define STACK_OP_DEF(mType)                                 \
 	template <>                                             \
