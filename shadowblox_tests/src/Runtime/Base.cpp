@@ -24,8 +24,10 @@
 
 #include "doctest.h"
 
-#include "Sbx/Runtime/Base.hpp"
 #include "lua.h"
+
+#include "Sbx/Runtime/Base.hpp"
+#include "Utils.hpp"
 
 using namespace SBX;
 
@@ -136,6 +138,15 @@ TEST_CASE("registry") {
 		CHECK(luaSBX_pushregistry(L, nullptr, push, false));
 		lua_pop(L, 1);
 	}
+
+	luaSBX_close(L);
+}
+
+TEST_CASE("timeout") {
+	lua_State *L = luaSBX_newstate(CoreVM, ElevatedGameScriptIdentity);
+	luaSBX_debugcallbacks(L);
+
+	CHECK_EVAL_FAIL(L, "while true do end", "Script timed out: exhausted allowed execution time");
 
 	luaSBX_close(L);
 }

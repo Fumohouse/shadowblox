@@ -29,6 +29,7 @@
 #include "Luau/Compiler.h"
 #include "lua.h"
 
+#include "Sbx/Runtime/Base.hpp"
 #include "Sbx/Runtime/Stack.hpp"
 
 using namespace SBX;
@@ -40,7 +41,7 @@ ExecOutput luaGD_exec(lua_State *L, const char *src) {
 	ExecOutput output;
 
 	if (luau_load(L, "=exec", bytecode.data(), bytecode.size(), 0) == 0) {
-		int status = lua_resume(L, nullptr, 0);
+		int status = luaSBX_resume(L, nullptr, 0, 1.0);
 		output.status = status;
 
 		if (status == LUA_OK) {

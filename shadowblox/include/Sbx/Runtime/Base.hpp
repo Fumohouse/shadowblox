@@ -128,4 +128,10 @@ void luaSBX_checkcapability(lua_State *L, SbxCapability capability, const char *
 
 bool luaSBX_pushregistry(lua_State *L, void *ptr, void (*push)(lua_State *L, void *ptr), bool weak);
 
+void luaSBX_debugcallbacks(lua_State *L);
+void luaSBX_cbinterrupt(lua_State *L, int gc);
+
+int luaSBX_resume(lua_State *L, lua_State *from, int nargs, double timeout = 10.0);
+int luaSBX_pcall(lua_State *L, int nargs, int nresults, int errfunc, double timeout = 10.0);
+
 } //namespace SBX

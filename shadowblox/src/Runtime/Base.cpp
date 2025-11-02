@@ -208,4 +208,45 @@ bool luaSBX_pushregistry(lua_State *L, void *ptr, void (*push)(lua_State *L, voi
 	return res;
 }
 
+void luaSBX_debugcallbacks(lua_State *L) {
+	lua_Callbacks *cb = lua_callbacks(L);
+	cb->interrupt = luaSBX_cbinterrupt;
+}
+
+void luaSBX_cbinterrupt(lua_State *L, int gc) {
+	SbxThreadData *udata = luaSBX_getthreaddata(L);
+
+	if (udata->interruptDeadline == 0)
+		return;
+
+	if (gc < 0 && (uint64_t)(lua_clock() * 1e6) > udata->interruptDeadline) {
+		lua_checkstack(L, 1);
+		luaL_error(L, "Script timed out: exhausted allowed execution time");
+	}
+}
+
+int luaSBX_resume(lua_State *L, lua_State *from, int nargs, double timeout) {
+	// TODO: Possible to avoid setting timeouts?
+	// Maybe use preprocessor defines
+	luaSBX_getthreaddata(L)->interruptDeadline = (uint64_t)((lua_clock() + timeout) * 1e6);
+
+	int status = lua_resume(L, from, nargs);
+
+	// TODO: Debug break if applicable
+
+	return status;
+}
+
+int luaSBX_pcall(lua_State *L, int nargs, int nresults, int errfunc, double timeout) {
+	// TODO: Possible to avoid setting timeouts?
+	// Maybe use preprocessor defines
+	luaSBX_getthreaddata(L)->interruptDeadline = (uint64_t)((lua_clock() + timeout) * 1e6);
+
+	int status = lua_pcall(L, nargs, nresults, errfunc);
+
+	// TODO: Debug break if applicable
+
+	return status;
+}
+
 } //namespace SBX

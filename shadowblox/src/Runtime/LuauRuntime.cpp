@@ -48,13 +48,13 @@ ThreadHandle::~ThreadHandle() {
 
 ThreadHandle::operator lua_State *() const { return L; }
 
-LuauRuntime::LuauRuntime(void (*initCallback)(lua_State *)) :
+LuauRuntime::LuauRuntime(void (*initCallback)(lua_State *), bool debug) :
 		initCallback(initCallback) {
 	vms[CoreVM] = luaSBX_newstate(CoreVM, ElevatedGameScriptIdentity);
-	InitVM(vms[CoreVM]);
+	InitVM(vms[CoreVM], debug);
 
 	vms[UserVM] = luaSBX_newstate(UserVM, GameScriptIdentity);
-	InitVM(vms[UserVM]);
+	InitVM(vms[UserVM], debug);
 }
 
 LuauRuntime::~LuauRuntime() {
@@ -64,7 +64,10 @@ LuauRuntime::~LuauRuntime() {
 	}
 }
 
-void LuauRuntime::InitVM(lua_State *L) {
+void LuauRuntime::InitVM(lua_State *L, bool debug) {
+	if (debug)
+		luaSBX_debugcallbacks(L);
+
 	if (initCallback)
 		initCallback(L);
 

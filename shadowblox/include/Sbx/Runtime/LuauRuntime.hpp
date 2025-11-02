@@ -36,7 +36,7 @@ class ThreadHandle;
 
 class LuauRuntime {
 public:
-	LuauRuntime(void (*initCallback)(lua_State *));
+	LuauRuntime(void (*initCallback)(lua_State *), bool debug = false);
 	~LuauRuntime();
 
 	LuauRuntime(const LuauRuntime &other) = delete;
@@ -52,7 +52,7 @@ public:
 private:
 	void (*initCallback)(lua_State *);
 	lua_State *vms[VMMax];
-	void InitVM(lua_State *L);
+	void InitVM(lua_State *L, bool debug);
 };
 
 class ThreadHandle {
