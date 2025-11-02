@@ -118,8 +118,12 @@ struct TestClass {
 	}
 };
 
+namespace SBX {
+
 STACK_OP_STATIC_PTR_DEF(TestClass);
 STATIC_PTR_STACK_OP_IMPL(TestClass, "TestClass", "SbxTests.TestClass", Test1Udata);
+
+} //namespace SBX
 
 TEST_CASE("class") {
 	lua_State *L = luaSBX_newstate(CoreVM, ElevatedGameScriptIdentity);

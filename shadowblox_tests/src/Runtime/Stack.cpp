@@ -48,8 +48,12 @@ struct TestStruct {
 	}
 };
 
+namespace SBX {
+
 STACK_OP_UDATA_DEF(TestStruct);
 UDATA_STACK_OP_IMPL(TestStruct, "TestStruct", "SbxTests.TestStruct", Test1Udata, NO_DTOR);
+
+} //namespace SBX
 
 template <typename T, typename U>
 static inline void testStackOp(lua_State *L, U value) {

@@ -106,8 +106,12 @@ TestStruct2 operator*(const TestStruct2 &x, int y) {
 	return TestStruct2(x.num * y);
 }
 
+namespace SBX {
+
 STACK_OP_UDATA_DEF(TestStruct2);
 UDATA_STACK_OP_IMPL(TestStruct2, "TestStruct", "SbxTests.TestStruct", Test1Udata, NO_DTOR);
+
+} //namespace SBX
 
 TEST_CASE("example") {
 	using Binder = LuauClassBinder<TestStruct2>;
@@ -203,7 +207,7 @@ TEST_CASE("example") {
 
 		EVAL_THEN(L, "return TestStruct.new().Axis", {
 			DataTypes::EnumItem *item = LuauStackOp<DataTypes::EnumItem *>::Get(L, -1);
-			CHECK_EQ(item->GetName(), "Y");
+			CHECK_EQ(std::string(item->GetName()), "Y");
 			CHECK_EQ(item->GetValue(), static_cast<int>(DataTypes::EnumAxis::Y));
 		});
 

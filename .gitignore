@@ -1,10 +1,17 @@
 /.direnv/
 
 /build/
+.sconsign.dblite
+
 *.a
 *.o
 *.os
-.sconsign.dblite
+
+*.exe
+*.lib
+*.obj
+*.ilk
+*.pdb
 
 __pycache__/
 *.gen.hpp
