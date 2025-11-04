@@ -51,11 +51,11 @@ TEST_CASE("resume") {
 		REQUIRE_EQ(lua_status(L), LUA_YIELD);
 
 		// Throttle
-		scheduler.Resume(ResumptionPoint::Heartbeat, 0.5, -1.0);
+		scheduler.Resume(ResumptionPoint::Heartbeat, 1, 0.5, -1.0);
 		REQUIRE_EQ(lua_status(L), LUA_YIELD);
 
 		// Pass
-		scheduler.Resume(ResumptionPoint::Heartbeat, 0.6, 1.0);
+		scheduler.Resume(ResumptionPoint::Heartbeat, 2, 0.6, 1.0);
 		REQUIRE_EQ(lua_status(L), LUA_OK);
 	}
 

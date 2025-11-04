@@ -68,7 +68,7 @@ public:
 	virtual int IsComplete(ResumptionPoint) = 0;
 	virtual bool ShouldResume() { return true; }
 	virtual int PushResults() = 0;
-	virtual void Update(double delta) = 0;
+	virtual void Update(uint64_t frame, double delta) = 0;
 
 protected:
 	lua_State *T;
@@ -84,7 +84,7 @@ public:
 
 	void AddTask(ScheduledTask *task);
 
-	void Resume(ResumptionPoint point, double delta, double throttleThreshold);
+	void Resume(ResumptionPoint point, uint64_t frame, double delta, double throttleThreshold);
 	void GCStep(double delta);
 
 	const uint32_t *GetGCStepSize() const { return gcCollectRate; }

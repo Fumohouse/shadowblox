@@ -52,7 +52,7 @@ TaskScheduler::TaskScheduler(LuauRuntime *runtime) :
 		runtime(runtime) {
 }
 
-void TaskScheduler::Resume(ResumptionPoint point, double delta, double throttleThreshold) {
+void TaskScheduler::Resume(ResumptionPoint point, uint64_t frame, double delta, double throttleThreshold) {
 	double start = lua_clock();
 
 	auto it = tasks.begin();
@@ -61,7 +61,7 @@ void TaskScheduler::Resume(ResumptionPoint point, double delta, double throttleT
 
 		// Do not throttle update (for now) to ensure delta accumulation is
 		// correct
-		task->Update(delta);
+		task->Update(frame, delta);
 
 		if ((!task->CanThrottle() || lua_clock() - start < throttleThreshold) &&
 				task->IsComplete(point)) {

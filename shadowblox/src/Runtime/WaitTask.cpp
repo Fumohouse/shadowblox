@@ -24,6 +24,8 @@
 
 #include "Sbx/Runtime/WaitTask.hpp"
 
+#include <cstdint>
+
 #include "lua.h"
 #include "lualib.h"
 
@@ -34,19 +36,21 @@ struct lua_State;
 
 namespace SBX {
 
-WaitTask::WaitTask(lua_State *T, double duration, bool canThrottle) :
-		ScheduledTask(T), remaining(duration), canThrottle(canThrottle) {
+WaitTask::WaitTask(lua_State *T, double duration, bool legacyThrottling) :
+		ScheduledTask(T), remaining(duration), legacyThrottling(legacyThrottling) {
 	start = lua_clock();
+	lastFrame = 0;
 }
 
 int WaitTask::IsComplete(ResumptionPoint) {
-	return remaining == 0.0;
+	// Legacy wait only attempts resume every other frame
+	return (!legacyThrottling || lastFrame % 2 == 0) && remaining == 0.0;
 }
 
 int WaitTask::PushResults() {
 	lua_pushnumber(T, lua_clock() - start);
 
-	if (canThrottle) {
+	if (legacyThrottling) {
 		// TODO: Correctness
 		lua_pushnumber(T, lua_clock());
 		return 2;
@@ -55,12 +59,14 @@ int WaitTask::PushResults() {
 	return 1;
 }
 
-void WaitTask::Update(double delta) {
+void WaitTask::Update(uint64_t frame, double delta) {
 	if (delta > remaining) {
 		remaining = 0.0;
 	} else {
 		remaining -= delta;
 	}
+
+	lastFrame = frame;
 }
 
 int luaSBX_wait(lua_State *L) {
