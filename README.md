@@ -1,5 +1,12 @@
 # shadowblox
 
+> **Note**
+>
+> This repository is mirrored from
+> [Forgejo](https://git.seki.pw/Fumohouse/shadowblox) to
+> [GitHub](https://github.com/Fumohouse/shadowblox). Issues and pull
+> requests are accepted from both sites, but pushes only occur from Forgejo.
+
 Shadow `DataModel` and script runner emulating Roblox APIs and behaviors. Hooks
 into a frontend that provides rendering, input, physics, networking, etc., such
 as [Godot](https://godotengine.org/) or another game engine. Like
