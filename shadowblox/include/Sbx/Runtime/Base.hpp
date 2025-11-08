@@ -49,6 +49,7 @@ namespace SBX {
 
 class Logger;
 class TaskScheduler;
+class SignalConnectionOwner;
 
 enum UdataTag : uint8_t {
 	Int64Udata = 0,
@@ -56,6 +57,8 @@ enum UdataTag : uint8_t {
 	EnumItemUdata,
 	EnumUdata,
 	EnumsUdata,
+	RBXScriptSignalUdata,
+	RBXScriptConnectionUdata,
 
 	Test1Udata = 124,
 	Test2Udata = 125,
@@ -121,6 +124,8 @@ struct SbxThreadData {
 
 	int objRegistry = LUA_NOREF;
 	int weakObjRegistry = LUA_NOREF;
+
+	SignalConnectionOwner *signalConnections = nullptr;
 
 	SbxGlobalThreadData *global = nullptr;
 	void *userdata = nullptr;

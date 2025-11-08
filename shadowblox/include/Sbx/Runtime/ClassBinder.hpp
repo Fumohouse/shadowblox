@@ -168,6 +168,23 @@ public:
 	}
 
 	/**
+	 * @brief Bind a Luau C function as a non-member function, to be registered
+	 * on the global table.
+	 *
+	 * @tparam funcName   The function's name.
+	 * @tparam F          The function.
+	 *
+	 * @see InitGlobalTable
+	 */
+	template <StringLiteral funcName, lua_CFunction F>
+	static void BindLuauStaticMethod() {
+		staticMethods[funcName.value] = {
+			F,
+			std::string(name) + funcName.value
+		};
+	}
+
+	/**
 	 * @brief Bind a member function to Luau.
 	 *
 	 * The function should be a member or non-member that takes one or more
@@ -182,6 +199,20 @@ public:
 	static void BindMethod() {
 		methods[funcName.value] = {
 			luaSBX_bindcxx<funcName, F, capability>,
+			std::string(name) + funcName.value
+		};
+	}
+
+	/**
+	 * @brief Bind a Luau C function as a member function.
+	 *
+	 * @tparam funcName   The function's name.
+	 * @tparam F          The function.
+	 */
+	template <StringLiteral funcName, lua_CFunction F>
+	static void BindLuauMethod() {
+		methods[funcName.value] = {
+			F,
 			std::string(name) + funcName.value
 		};
 	}

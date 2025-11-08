@@ -25,12 +25,15 @@
 #include "Sbx/Runtime/TaskScheduler.hpp"
 
 #include <cstdint>
+#include <functional>
+#include <utility>
 
 #include "lua.h"
 #include "lualib.h"
 
 #include "Sbx/Runtime/Base.hpp"
 #include "Sbx/Runtime/LuauRuntime.hpp"
+#include "Sbx/Runtime/SignalEmitter.hpp"
 
 #include "Sbx/Runtime/WaitTask.hpp"
 
@@ -67,7 +70,7 @@ void TaskScheduler::Resume(ResumptionPoint point, uint64_t frame, double delta, 
 				task->IsComplete(point)) {
 			if (task->ShouldResume()) {
 				int nret = task->PushResults();
-				luaSBX_resume(task->T, nullptr, nret);
+				luaSBX_resume(task->GetThread(), nullptr, nret);
 			}
 
 			delete *it;
@@ -81,6 +84,20 @@ void TaskScheduler::Resume(ResumptionPoint point, uint64_t frame, double delta, 
 
 		it++;
 	}
+
+	// NOTE: Must be careful as this list can be modified during iteration if
+	// CancelEvents is called from Disconnect. To avoid memory problems from
+	// deleting the DeferredEvent, move each item out of the list and remove
+	// the entry before calling resume.
+	while (!deferredEvents.empty()) {
+		DeferredEvent ev = std::move(deferredEvents.front());
+		deferredEvents.pop_front();
+
+		currentReentrancy = std::move(ev.pathReentrancy);
+		ev.resume();
+	}
+
+	currentReentrancy.clear();
 }
 
 void TaskScheduler::GCStep(double delta) {
@@ -120,20 +137,57 @@ void TaskScheduler::AddTask(ScheduledTask *task) {
 	tasks.push_back(task);
 }
 
+void TaskScheduler::AddDeferredEvent(const char *name, SignalEmitter *emitter, uint64_t id, lua_State *L, std::function<void()> resume) {
+	if (currentReentrancy[emitter][id] >= DEFERRED_EVENT_REENTRANCY_LIMIT) {
+		// Function must be on top of stack
+		luaSBX_reentrancyerror(L, name);
+	} else {
+		lua_pop(L, 1); // function
+
+		auto childReentrancy = currentReentrancy;
+		childReentrancy[emitter][id]++;
+
+		deferredEvents.push_back({ emitter,
+				id,
+				L,
+				std::move(resume),
+				std::move(childReentrancy) });
+	}
+}
+
+void TaskScheduler::CancelTask(ScheduledTask *task) {
+	delete task;
+	tasks.remove(task);
+}
+
 void TaskScheduler::CancelThread(lua_State *L) {
 	// May be relevant in case of a destroyed Actor
 	tasks.remove_if([=](ScheduledTask *task) {
-		if (task->T == L) {
+		if (task->GetThread() == L) {
 			delete task;
 			return true;
 		}
 
 		return false;
 	});
+
+	deferredEvents.remove_if([=](const DeferredEvent &ev) {
+		return ev.L == L;
+	});
+}
+
+void TaskScheduler::CancelEvents(SignalEmitter *emitter, uint64_t id) {
+	deferredEvents.remove_if([=](DeferredEvent &ev) {
+		return ev.emitter == emitter && ev.id == id;
+	});
 }
 
 int TaskScheduler::NumPendingTasks() const {
 	return tasks.size();
+}
+
+int TaskScheduler::NumPendingEvents() const {
+	return deferredEvents.size();
 }
 
 static const luaL_Reg LEGACY_SCHEDULER_LIB[] = {

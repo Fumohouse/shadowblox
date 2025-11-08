@@ -25,7 +25,9 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <list>
+#include <unordered_map>
 
 #include "lua.h"
 
@@ -34,6 +36,7 @@
 namespace SBX {
 
 class LuauRuntime;
+class SignalEmitter;
 
 // Luau uses 1 "step unit" ~= 1KiB
 // amount (bytes) = step << 10
@@ -64,18 +67,29 @@ public:
 	ScheduledTask &operator=(const ScheduledTask &other) = delete;
 	ScheduledTask &operator=(ScheduledTask &&other) = delete;
 
+	lua_State *GetThread() { return T; }
+
 	virtual bool CanThrottle() { return false; }
-	virtual int IsComplete(ResumptionPoint) = 0;
+	virtual bool IsComplete(ResumptionPoint point) = 0;
 	virtual bool ShouldResume() { return true; }
 	virtual int PushResults() = 0;
-	virtual void Update(uint64_t frame, double delta) = 0;
+	virtual void Update(uint64_t frame, double delta) {} // NOLINT
 
 protected:
 	lua_State *T;
-	friend class TaskScheduler;
 
 private:
 	int threadRef;
+};
+
+struct DeferredEvent {
+	// Not to be dereferenced; may be collected prior to firing event
+	void *emitter;
+	uint64_t id;
+	lua_State *L;
+	std::function<void()> resume;
+
+	std::unordered_map<SignalEmitter *, std::unordered_map<uint64_t, int>> pathReentrancy;
 };
 
 class TaskScheduler {
@@ -83,9 +97,13 @@ public:
 	TaskScheduler(LuauRuntime *runtime);
 
 	void AddTask(ScheduledTask *task);
+	void AddDeferredEvent(const char *name, SignalEmitter *emitter, uint64_t id, lua_State *L, std::function<void()> resume);
+	void CancelTask(ScheduledTask *task);
 	void CancelThread(lua_State *L);
+	void CancelEvents(SignalEmitter *emitter, uint64_t id);
 
 	int NumPendingTasks() const;
+	int NumPendingEvents() const;
 
 	void Resume(ResumptionPoint point, uint64_t frame, double delta, double throttleThreshold);
 	void GCStep(double delta);
@@ -96,6 +114,9 @@ private:
 	LuauRuntime *runtime;
 
 	std::list<ScheduledTask *> tasks;
+	std::list<DeferredEvent> deferredEvents;
+
+	std::unordered_map<SignalEmitter *, std::unordered_map<uint64_t, int>> currentReentrancy;
 
 	uint32_t gcCollectRate[VMMax] = { GC_RATE_MIN };
 	int32_t gcSizeRate[VMMax] = { 0 };

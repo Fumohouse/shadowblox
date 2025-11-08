@@ -22,28 +22,52 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include "Sbx/DataTypes/Types.hpp"
+#pragma once
+
+#include <memory>
+#include <string>
 
 #include "lua.h"
 
-#include "Sbx/DataTypes/Enum.hpp"
-#include "Sbx/DataTypes/EnumItem.hpp"
-#include "Sbx/DataTypes/EnumTypes.gen.hpp"
-#include "Sbx/DataTypes/Enums.hpp"
-#include "Sbx/DataTypes/RBXScriptConnection.hpp"
-#include "Sbx/DataTypes/RBXScriptSignal.hpp"
+#include "Sbx/Runtime/Stack.hpp"
+
+namespace SBX {
+
+class SignalEmitter;
+
+}
 
 namespace SBX::DataTypes {
 
-void luaSBX_opendatatypes(lua_State *L) {
-	EnumItem::Register(L);
-	Enum::Register(L);
-	Enums::Register(L);
-	LuauStackOp<Enums *>::Push(L, &enums);
-	lua_setglobal(L, "Enum");
+/**
+ * @brief This class implements Roblox's [`RBXScriptSignal`](https://create.roblox.com/docs/en-us/reference/engine/datatypes/RBXScriptSignal)
+ * data type.
+ */
+class RBXScriptSignal {
+public:
+	RBXScriptSignal(); // required for stack operation
+	RBXScriptSignal(std::shared_ptr<SignalEmitter> emitter, std::string name);
 
-	RBXScriptSignal::Register(L);
-	RBXScriptConnection::Register(L);
-}
+	static void Register(lua_State *L);
+
+	static int Connect(lua_State *L);
+	static int Once(lua_State *L);
+	static int Wait(lua_State *L);
+
+	std::string ToString() const;
+	bool operator==(const RBXScriptSignal &other) const;
+
+private:
+	// Hold this reference to allow this object to continue working after the
+	// emitter owner is collected.
+	std::shared_ptr<SignalEmitter> emitter;
+	std::string name;
+};
 
 } //namespace SBX::DataTypes
+
+namespace SBX {
+
+STACK_OP_UDATA_DEF(DataTypes::RBXScriptSignal);
+
+}

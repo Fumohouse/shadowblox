@@ -22,28 +22,52 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-#include "Sbx/DataTypes/Types.hpp"
+#pragma once
+
+#include <cstdint>
+#include <memory>
+#include <string>
 
 #include "lua.h"
 
-#include "Sbx/DataTypes/Enum.hpp"
-#include "Sbx/DataTypes/EnumItem.hpp"
-#include "Sbx/DataTypes/EnumTypes.gen.hpp"
-#include "Sbx/DataTypes/Enums.hpp"
-#include "Sbx/DataTypes/RBXScriptConnection.hpp"
-#include "Sbx/DataTypes/RBXScriptSignal.hpp"
+#include "Sbx/Runtime/Stack.hpp"
+
+namespace SBX {
+
+class SignalEmitter;
+
+}
 
 namespace SBX::DataTypes {
 
-void luaSBX_opendatatypes(lua_State *L) {
-	EnumItem::Register(L);
-	Enum::Register(L);
-	Enums::Register(L);
-	LuauStackOp<Enums *>::Push(L, &enums);
-	lua_setglobal(L, "Enum");
+/**
+ * @brief This class implements Roblox's [`RBXScriptConnection`](https://create.roblox.com/docs/en-us/reference/engine/datatypes/RBXScriptConnection)
+ * data type.
+ */
+class RBXScriptConnection {
+public:
+	RBXScriptConnection(); // required for stack operation
+	RBXScriptConnection(std::shared_ptr<SignalEmitter> emitter, std::string name, uint64_t id);
 
-	RBXScriptSignal::Register(L);
-	RBXScriptConnection::Register(L);
-}
+	static void Register(lua_State *L);
+
+	bool IsConnected() const;
+	void Disconnect();
+
+	const char *ToString() const;
+
+private:
+	// Hold this reference to force connections to stay connected once the
+	// emitter owner is collected.
+	std::shared_ptr<SignalEmitter> emitter;
+	std::string name;
+	uint64_t id;
+};
 
 } //namespace SBX::DataTypes
+
+namespace SBX {
+
+STACK_OP_UDATA_DEF(DataTypes::RBXScriptConnection);
+
+}

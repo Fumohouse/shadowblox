@@ -40,7 +40,7 @@ WaitTask::WaitTask(lua_State *T, double duration, bool legacyThrottling) :
 		ScheduledTask(T), elapsed(0.0), duration(duration), lastFrame(0), legacyThrottling(legacyThrottling) {
 }
 
-int WaitTask::IsComplete(ResumptionPoint) {
+bool WaitTask::IsComplete(ResumptionPoint) {
 	// Legacy wait only attempts resume every other frame
 	return (!legacyThrottling || lastFrame % 2 == 0) && elapsed >= duration;
 }

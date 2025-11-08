@@ -32,6 +32,7 @@
 #include "lualib.h"
 
 #include "Sbx/Runtime/Logger.hpp"
+#include "Sbx/Runtime/SignalEmitter.hpp"
 #include "Sbx/Runtime/Stack.hpp"
 #include "Sbx/Runtime/TaskScheduler.hpp"
 
@@ -58,6 +59,7 @@ static SbxThreadData *luaSBX_initthreaddata(lua_State *LP, lua_State *L) {
 		udata->additionalCapability = parentUdata->additionalCapability;
 		udata->objRegistry = parentUdata->objRegistry;
 		udata->weakObjRegistry = parentUdata->weakObjRegistry;
+		udata->signalConnections = parentUdata->signalConnections;
 		udata->global = parentUdata->global;
 		udata->userdata = parentUdata->userdata;
 	}
@@ -73,6 +75,10 @@ static void luaSBX_userthread(lua_State *LP, lua_State *L) {
 
 		if (udata->global->scheduler) {
 			udata->global->scheduler->CancelThread(L);
+		}
+
+		if (udata->signalConnections) {
+			udata->signalConnections->Clear();
 		}
 
 		lua_setthreaddata(L, nullptr);
@@ -141,6 +147,10 @@ void luaSBX_close(lua_State *L) {
 
 	if (udata->global->scheduler) {
 		udata->global->scheduler->CancelThread(L);
+	}
+
+	if (udata->signalConnections) {
+		udata->signalConnections->Clear();
 	}
 
 	lua_close(L);
