@@ -42,10 +42,9 @@ int testRet(int x, int y) {
 	return x * y;
 }
 
-void testVoid(float a, lua_State *L, float b) {
+void testVoid(float a, float b) {
 	CHECK_EQ(a, 0.5);
 	CHECK_EQ(b, 0.25);
-	CHECK_EQ(lua_gettop(L), 2);
 }
 
 std::tuple<int, bool, float, const char *> testTuple() {

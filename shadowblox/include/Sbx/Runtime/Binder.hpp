@@ -69,16 +69,13 @@ struct StringLiteral {
 };
 
 template <typename T, StringLiteral name, BindPurpose purpose, int ofs>
-inline T luaSBX_checkarg(lua_State *L, int &index) {
-	if constexpr (std::is_same_v<T, lua_State *>) {
-		return L;
-	} else if constexpr (DataTypes::EnumClassToEnum<T>::enumType) {
+inline T luaSBX_checkarg(lua_State *L, int index) {
+	if constexpr (DataTypes::EnumClassToEnum<T>::enumType) {
 		constexpr DataTypes::Enum *E = DataTypes::EnumClassToEnum<T>::enumType;
 
 		if (lua_isnumber(L, index)) {
 			int num = lua_tonumber(L, index);
 			if (E->FromValue(num)) {
-				index++;
 				return static_cast<T>(num);
 			}
 
@@ -91,7 +88,6 @@ inline T luaSBX_checkarg(lua_State *L, int &index) {
 		} else if (lua_type(L, index) == LUA_TSTRING) {
 			const char *value = lua_tostring(L, index);
 			if (auto item = E->FromName(value)) {
-				index++;
 				return static_cast<T>((*item)->GetValue());
 			}
 
@@ -104,7 +100,6 @@ inline T luaSBX_checkarg(lua_State *L, int &index) {
 		} else if (LuauStackOp<DataTypes::EnumItem *>::Is(L, index)) {
 			DataTypes::EnumItem *item = LuauStackOp<DataTypes::EnumItem *>::Get(L, index);
 			if (item->GetEnumType() == E) {
-				index++;
 				return static_cast<T>(item->GetValue());
 			}
 
@@ -127,7 +122,7 @@ inline T luaSBX_checkarg(lua_State *L, int &index) {
 		}
 	} else {
 		if (LuauStackOp<T>::Is(L, index)) {
-			return LuauStackOp<T>::Get(L, index++);
+			return LuauStackOp<T>::Get(L, index);
 		}
 
 		if constexpr (purpose == BindSetter) {
@@ -190,13 +185,17 @@ struct FuncType<R (*)(Args...), name, purpose> {
 	using RetType = R;
 	using ArgTypes = std::tuple<Args...>;
 
-	static R Invoke(lua_State *L, FuncPtrType func) {
+	template <size_t... N>
+	static R Invoke(lua_State *L, FuncPtrType func, std::index_sequence<N...> /*unused*/) {
 		// C++ FUN FACT:
 		// (): Parameter pack expansion may not be evaluated in order
 		// {}: Evaluated in order
 		// https://stackoverflow.com/a/42047998
-		int i = 1;
-		return std::apply(func, std::tuple{ luaSBX_checkarg<Args, name, purpose, 0>(L, i)... });
+		return std::apply(func, std::tuple{ luaSBX_checkarg<Args, name, purpose, 0>(L, N + 1)... });
+	}
+
+	static R Invoke(lua_State *L, FuncPtrType func) {
+		return Invoke(L, func, std::make_index_sequence<sizeof...(Args)>());
 	}
 };
 
@@ -209,14 +208,13 @@ struct FuncType<R (T::*)(Args...), name, purpose> {
 
 	template <size_t... N>
 	static R Invoke(lua_State *L, FuncPtrType func, std::index_sequence<N...> /*unused*/) {
-		int i = 2;
 		T *self = LuauStackOp<T *>::Get(L, 1);
 		if constexpr (purpose == BindFunction) {
 			if (!self) {
 				luaSBX_missingselferror(L, name.value);
 			}
 		}
-		std::tuple args{ luaSBX_checkarg<Args, name, purpose, 1>(L, i)... };
+		std::tuple args{ luaSBX_checkarg<Args, name, purpose, 1>(L, N + 2)... };
 		return std::invoke(func, self, std::get<N>(args)...);
 	}
 
@@ -234,14 +232,13 @@ struct FuncType<R (T::*)(Args...) const, name, purpose> {
 
 	template <size_t... N>
 	static R Invoke(lua_State *L, FuncPtrType func, std::index_sequence<N...> /*unused*/) {
-		int i = 2;
 		T *self = LuauStackOp<T *>::Get(L, 1);
 		if constexpr (purpose == BindFunction) {
 			if (!self) {
 				luaSBX_missingselferror(L, name.value);
 			}
 		}
-		std::tuple args{ luaSBX_checkarg<Args, name, purpose, 1>(L, i)... };
+		std::tuple args{ luaSBX_checkarg<Args, name, purpose, 1>(L, N + 2)... };
 		return std::invoke(func, self, std::get<N>(args)...);
 	}
 
