@@ -58,13 +58,15 @@ private:
 
 class SignalEmitter {
 public:
-	SignalEmitter(std::string name, bool deferred);
+	SignalEmitter();
 	~SignalEmitter();
 
 	SignalEmitter(const SignalEmitter &other) = delete;
 	SignalEmitter(SignalEmitter &&other) = delete;
 	SignalEmitter &operator=(const SignalEmitter &other) = delete;
 	SignalEmitter &operator=(SignalEmitter &&other) = delete;
+
+	void SetDeferred(bool isDeferred);
 
 	uint64_t Connect(const std::string &signal, lua_State *L, bool once);
 	bool IsConnected(const std::string &signal, uint64_t id) const;
@@ -74,7 +76,7 @@ public:
 	int NumConnections() const;
 
 	template <typename... Args>
-	void Emit(const std::string &signal, Args... args) {
+	void Emit(const std::string &signal, const char *debugName, Args... args) {
 		std::vector<uint64_t> toRemove;
 
 		if (deferred) {
@@ -93,8 +95,7 @@ public:
 				int newRef = lua_ref(conn.L, -1);
 				// Leave function on stack for AddDeferredEvent
 
-				std::string debugName = name + '.' + signal;
-				udata->global->scheduler->AddDeferredEvent(debugName.c_str(), this, id, conn.L, [=]() {
+				udata->global->scheduler->AddDeferredEvent(debugName, this, id, conn.L, [=]() {
 					lua_getref(conn.L, newRef);
 					(LuauStackOp<Args>::Push(conn.L, args), ...);
 					luaSBX_pcall(conn.L, sizeof...(Args), 0, 0);
@@ -110,7 +111,7 @@ public:
 			auto connectionsCopy = connections[signal];
 			for (const auto &[id, conn] : connectionsCopy) {
 				// Deleted during iteration
-				if (connections[signal].find(id) == connections[signal].end()) {
+				if (!connections[signal].contains(id)) {
 					continue;
 				}
 
@@ -119,8 +120,7 @@ public:
 				bool firstEntrant = immediateReentrancy.empty();
 
 				if (++immediateReentrancy[id] > IMMEDIATE_EVENT_REENTRANCY_LIMIT) {
-					std::string debugName = name + "." + signal;
-					luaSBX_reentrancyerror(conn.L, debugName.c_str());
+					luaSBX_reentrancyerror(conn.L, debugName);
 				} else {
 					(LuauStackOp<Args>::Push(conn.L, args), ...);
 					luaSBX_pcall(conn.L, sizeof...(Args), 0, 0);
@@ -161,8 +161,7 @@ private:
 		bool once;
 	};
 
-	std::string name;
-	bool deferred;
+	bool deferred = false;
 	uint64_t nextId = 0;
 	std::unordered_map<uint64_t, int> immediateReentrancy;
 	std::unordered_map<std::string, std::unordered_map<uint64_t, Connection>> connections;

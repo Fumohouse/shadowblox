@@ -54,9 +54,7 @@ void luaSBX_reentrancyerror(lua_State *L, const char *signalName) {
 	lua_pop(L, 1);
 }
 
-SignalEmitter::SignalEmitter(std::string name, bool deferred) :
-		name(std::move(name)), deferred(deferred) {
-}
+SignalEmitter::SignalEmitter() {}
 
 SignalEmitter::~SignalEmitter() {
 	for (const auto &[connName, conns] : connections) {
@@ -81,6 +79,10 @@ SignalEmitter::~SignalEmitter() {
 	}
 }
 
+void SignalEmitter::SetDeferred(bool isDeferred) {
+	deferred = isDeferred;
+}
+
 uint64_t SignalEmitter::Connect(const std::string &signal, lua_State *L, bool once) {
 	uint64_t id = nextId++;
 	connections[signal][id] = { L, lua_ref(L, -1), once };
@@ -99,7 +101,8 @@ bool SignalEmitter::IsConnected(const std::string &signal, uint64_t id) const {
 	if (conns == connections.end()) {
 		return false;
 	}
-	return conns->second.find(id) != conns->second.end();
+
+	return conns->second.contains(id);
 }
 
 void SignalEmitter::Disconnect(const std::string &signal, uint64_t id, bool cancel, bool updateOwner) {
