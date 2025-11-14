@@ -14,6 +14,7 @@ class_tags = set()
 
 member_categories = set()
 member_types = set()
+member_tags = set()
 thread_safety = set()
 
 security = set()
@@ -21,7 +22,14 @@ security = set()
 type_categories = set()
 types = set()
 
+class_attrs = set()
+function_attrs = set()
+property_attrs = set()
+event_attrs = set()
+callback_attrs = set()
+
 for c in data["Classes"]:
+    class_attrs = class_attrs.union(set(c.keys()))
     memory_categories.add(c["MemoryCategory"])
     if "Tags" in c:
         for tag in c["Tags"]:
@@ -31,6 +39,17 @@ for c in data["Classes"]:
         if "Category" in member:
             member_categories.add(member["Category"])
         member_types.add(member["MemberType"])
+        if member["MemberType"] == "Function":
+            function_attrs = function_attrs.union(set(member.keys()))
+        elif member["MemberType"] == "Property":
+            property_attrs = property_attrs.union(set(member.keys()))
+        elif member["MemberType"] == "Event":
+            event_attrs = event_attrs.union(set(member.keys()))
+        elif member["MemberType"] == "Callback":
+            callback_attrs = callback_attrs.union(set(member.keys()))
+        if "Tags" in member:
+            for tag in member["Tags"]:
+                member_tags.add(tag)
         thread_safety.add(member["ThreadSafety"])
 
         if isinstance(member["Security"], dict):
@@ -47,8 +66,14 @@ for c in data["Classes"]:
                 type_categories.add(p["Type"]["Category"])
                 types.add((p["Type"]["Name"], p["Type"]["Category"]))
         if "ReturnType" in member:
-            type_categories.add(member["ReturnType"]["Category"])
-            types.add((member["ReturnType"]["Name"], member["ReturnType"]["Category"]))
+            return_types = (
+                member["ReturnType"]
+                if isinstance(member["ReturnType"], list)
+                else [member["ReturnType"]]
+            )
+            for t in return_types:
+                type_categories.add(t["Category"])
+                types.add((t["Name"], t["Category"]))
 
 
 print("MEMORY CATEGORIES:")
@@ -68,6 +93,11 @@ print()
 
 print("MEMBER TYPES:")
 for s in member_types:
+    print(" " + s)
+print()
+
+print("MEMBER TAGS:")
+for s in member_tags:
     print(" " + s)
 print()
 
@@ -92,3 +122,9 @@ for name, category in types:
         continue
     print(f" {category}:{name}")
 print()
+
+print("CLASS ATTRS:", class_attrs)
+print("PROPERTY ATTRS:", property_attrs)
+print("FUNCTION ATTRS:", function_attrs)
+print("EVENT ATTRS:", event_attrs)
+print("CALLBACK ATTRS:", callback_attrs)
