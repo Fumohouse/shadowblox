@@ -112,11 +112,17 @@ type_map = {
     "float": {"type": "float"},
     "double": {"type": "double"},
     "string": {"type": "const char *"},
+    # Luau
+    "Function": {"type": "Variant", "include": '"Sbx/Classes/Variant.hpp"'},
+    "Dictionary": {"type": "Variant", "include": '"Sbx/Classes/Variant.hpp"'},
+    "Array": {"type": "Variant", "include": '"Sbx/Classes/Variant.hpp"'},
     # Data types
     "RBXScriptSignal": {
         "type": "DataTypes::RBXScriptSignal",
         "include": '"Sbx/DataTypes/RBXScriptSignal.hpp"',
     },
+    # Other
+    "Variant": {"type": "Variant", "include": '"Sbx/Classes/Variant.hpp"'},
 }
 
 auto_tags = {"ReadOnly", "CustomLuaState", "NotScriptable"}

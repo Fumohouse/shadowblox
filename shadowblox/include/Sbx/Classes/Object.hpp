@@ -85,7 +85,11 @@ requires Classes::IsObject<T> struct LuauStackOp<std::shared_ptr<T>> {
 	}
 
 	static void Push(lua_State *L, const Ref &value) {
-		luaSBX_pushregistry(L, value.get(), (void *)&value, PushRaw, true);
+		if (value) {
+			luaSBX_pushregistry(L, value.get(), (void *)&value, PushRaw, true);
+		} else {
+			lua_pushnil(L);
+		}
 	}
 
 	static Ref *GetPtr(lua_State *L, int index) {

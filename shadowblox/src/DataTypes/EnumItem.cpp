@@ -27,8 +27,8 @@
 #include <string>
 
 #include "lua.h"
-#include "lualib.h" // NOLINT
 
+#include "Sbx/Classes/Variant.hpp"
 #include "Sbx/DataTypes/Enum.hpp"
 #include "Sbx/Runtime/Base.hpp"
 #include "Sbx/Runtime/ClassBinder.hpp"
@@ -45,7 +45,7 @@ void EnumItem::Register(lua_State *L) {
 	using B = LuauClassBinder<EnumItem>;
 
 	if (!B::IsInitialized()) {
-		B::Init("EnumItem", "EnumItem", EnumItemUdata);
+		B::Init("EnumItem", "EnumItem", EnumItemUdata, Classes::Variant::EnumItem);
 		B::BindToString<&EnumItem::ToString>();
 		B::BindPropertyReadOnly<"Name", &EnumItem::GetName, NoneSecurity>();
 		B::BindPropertyReadOnly<"Value", &EnumItem::GetValue, NoneSecurity>();

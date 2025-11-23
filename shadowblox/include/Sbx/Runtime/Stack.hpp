@@ -219,7 +219,7 @@ struct LuauStackOp<std::vector<T>> {
 };
 
 template <typename T>
-const std::string LuauStackOp<std::vector<T>>::NAME = LuauStackOp<T>::NAME + "[]";
+const std::string LuauStackOp<std::vector<T>>::NAME = "Array";
 
 #define STACK_OP_DEF(mType)                                 \
 	template <>                                             \

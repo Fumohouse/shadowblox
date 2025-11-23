@@ -59,11 +59,15 @@ public:
 	 * @param newMetatableName The metatable name of this class.
 	 * @param newUdataTag      The userdata tag for this class. If negative, the
 	 *                         metatable is registered by name only.
+	 * @param newTypeId        The type ID for this class, to be recorded in its
+	 *                         metatable as __sbxtype. If negative, __sbxtype is
+	 *                         not populated.
 	 */
-	static void Init(const char *newName, const char *newMetatableName, int newUdataTag = -1) {
+	static void Init(const char *newName, const char *newMetatableName, int newUdataTag = -1, int newTypeId = -1) {
 		name = newName;
 		metatableName = newMetatableName;
 		udataTag = newUdataTag;
+		typeId = newTypeId;
 	}
 
 	/**
@@ -112,6 +116,11 @@ public:
 
 		lua_pushstring(L, name);
 		lua_setfield(L, -2, "__type");
+
+		if (typeId >= 0) {
+			lua_pushinteger(L, typeId);
+			lua_setfield(L, -2, "__sbxtype");
+		}
 
 		lua_pushstring(L, "The metatable is locked");
 		lua_setfield(L, -2, "__metatable");
@@ -383,6 +392,7 @@ private:
 	static const char *name;
 	static const char *metatableName;
 	static int udataTag;
+	static int typeId;
 
 	struct Method {
 		lua_CFunction func = nullptr;
@@ -509,6 +519,9 @@ const char *LuauClassBinder<T>::metatableName = "";
 
 template <typename T>
 int LuauClassBinder<T>::udataTag = -1;
+
+template <typename T>
+int LuauClassBinder<T>::typeId = -1;
 
 template <typename T>
 StringMap<typename LuauClassBinder<T>::Method> LuauClassBinder<T>::staticMethods;

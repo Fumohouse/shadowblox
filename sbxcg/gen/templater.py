@@ -92,9 +92,6 @@ def convert_type(type: dict, self: str, includes: set[str], classes: dict) -> st
     if name.endswith("?"):
         includes.add("<optional>")
         return f"std::optional<{convert_type({'Category': category, 'Name': name[:-1]}, self, includes, classes)}>"
-    elif name.endswith("[]"):
-        includes.add("<vector>")
-        return f"std::vector<{convert_type({'Category': category, 'Name': name[:-2]}, self, includes, classes)}>"
     elif category == "Class":
         header = classes.get(name, {}).get("header", f"{name}.hpp")
         if name != self:

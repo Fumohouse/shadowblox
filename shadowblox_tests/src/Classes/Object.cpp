@@ -361,6 +361,11 @@ TEST_CASE("stack operation") {
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	CHECK_EQ(testDerived.use_count(), 1);
 
+	// Null
+	LuauStackOp<std::shared_ptr<Object>>::Push(L, std::shared_ptr<Object>());
+	CHECK(lua_isnil(L, -1));
+	lua_pop(L, 1);
+
 	luaSBX_close(L);
 }
 

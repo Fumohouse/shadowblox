@@ -39,6 +39,7 @@
 #include "lua.h"
 #include "lualib.h"
 
+#include "Sbx/Classes/Variant.hpp"
 #include "Sbx/DataTypes/Enum.hpp"
 #include "Sbx/DataTypes/EnumTypes.gen.hpp"
 #include "Sbx/Runtime/Base.hpp"
@@ -412,8 +413,8 @@ public:                                                                         
 	static void InitializeClass() {                                                                                   \
 		static bool initialized = false;                                                                              \
 		if (!initialized) {                                                                                           \
-			::SBX::Classes::ClassDB::AddClass<className, category, __VA_ARGS__>(#parent);                             \
-			LuauClassBinder<className>::Init(#className, #className);                                                 \
+			::SBX::Classes::ClassDB::AddClass<className, category, ##__VA_ARGS__>(#parent);                           \
+			LuauClassBinder<className>::Init(#className, #className, -1, ::SBX::Classes::Variant::Object);            \
 			LuauClassBinder<className>::AddIndexOverride(IndexOverride);                                              \
 			LuauClassBinder<className>::AddNewindexOverride(NewindexOverride);                                        \
 			BindMembers<className>();                                                                                 \
