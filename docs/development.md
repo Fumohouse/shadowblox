@@ -36,6 +36,25 @@ scons -j4 toolchain=msvc config=debug
 A test binary is compiled in `shadowblox_tests/shadowblox_tests` (or
 `shadowblox_tests\shadowblox_tests.exe` on Windows).
 
+## Development environment
+
+The following additional packages are recommended or required for development.
+
+Testing:
+
+- `valgrind`
+
+Formatting:
+
+- `treefmt`
+- `clang-tools` (for `clang-format` and `clang-tidy`)
+- `stylua`
+- `black` (Python formatter)
+
+Documentation:
+
+- `doxygen`
+
 ## `sbxcg`
 
 `sbxcg` is used for code generation and managing the Roblox API dump. It is a

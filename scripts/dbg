@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCONS_CACHE=build/dbg scons config=debug target=editor debug_symbols=yes

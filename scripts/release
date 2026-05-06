@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCONS_CACHE=build/release scons config=release target=template_release

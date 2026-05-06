@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+treefmt && python3 -m sbxcg licenser

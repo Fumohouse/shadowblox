@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+valgrind --leak-check=full shadowblox_tests/shadowblox_tests

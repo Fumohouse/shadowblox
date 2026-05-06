@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCONS_CACHE=build/relwithdbg scons config=relwithdbg target=template_release debug_symbols=yes

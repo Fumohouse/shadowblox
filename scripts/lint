@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+git ls-files | grep -E '\.(cpp|hpp)$' | xargs clang-tidy --fix --fix-errors

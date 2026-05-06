@@ -3,10 +3,6 @@ walk = "git"
 [global]
 excludes = [ "extern/include/*" ]
 
-[formatter.nix]
-command = "nixpkgs-fmt"
-includes = [ "*.nix" ]
-
 [formatter.cpp]
 command = "clang-format"
 options = [ "-i" ]
